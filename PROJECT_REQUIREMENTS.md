@@ -1,71 +1,106 @@
-# EmergencyConnect - Project Requirements & Dependencies
+# EmergencyConnect - Production Deployment Requirements
 
-## System Requirements
-- **Node.js**: >= 18.0.0
-- **npm**: >= 9.0.0
-- **PostgreSQL**: >= 14.0 (Neon Serverless)
-- **Environment**: Replit Production Ready
+## Overview
+EmergencyConnect is a production-ready emergency response coordination platform built with React, TypeScript, and Express. This document outlines the deployment requirements for hosting the backend on Railway.com and frontend on Vercel.com.
 
-## Core Technology Stack
+## Architecture
+- **Frontend**: React 18 + TypeScript + Vite (deployed on Vercel)
+- **Backend**: Node.js + Express + TypeScript (deployed on Railway)
+- **Database**: Neon PostgreSQL (serverless, user-managed)
+- **Real-time**: Native WebSocket implementation
+- **Authentication**: JWT with bcrypt password hashing
 
-### Frontend (React 18.3.1)
-- **React**: Modern React with concurrent features
-- **Vite**: 7.0.4 - Fast development and optimized builds
-- **TypeScript**: 5.8.3 - End-to-end type safety
-- **Tailwind CSS**: 4.1.11 - Utility-first styling
-- **Radix UI**: Comprehensive accessible components
-- **TanStack Query**: Server state management
-- **Wouter**: Lightweight routing
+## Deployment Configuration
 
-### Backend (Express 4.21.2)
-- **Express**: Web application framework
-- **tsx**: TypeScript execution for Node.js
-- **WebSocket**: Real-time communication (ws + uws)
-- **Authentication**: JWT + bcrypt + Passport
+### Backend (Railway.com)
+The backend is configured for Railway deployment with:
+- `railway.json` configuration file
+- Health check endpoint at `/api/health`
+- Environment variables for production
+- PostgreSQL database integration
+- WebSocket server support
 
-### Database (PostgreSQL)
-- **Neon Serverless**: Cloud PostgreSQL
-- **Drizzle ORM**: 0.44.2 - Type-safe database operations
-- **Drizzle Kit**: 0.31.4 - Schema migrations
-
-## Security & Performance
-- ✅ All packages updated to latest secure versions
-- ✅ No deprecated dependencies
-- ✅ Eliminated eval() usage in WebSocket hooks
-- ✅ Removed deprecated googlemaps package
-- ✅ Modern Express error handling patterns
-- ✅ Auto-dismissing toast notifications (5 seconds)
+### Frontend (Vercel.com)
+The frontend is configured for Vercel deployment with:
+- `vercel.json` configuration file
+- Vite build optimization
+- Environment variable support for API URL
+- SPA routing configuration
 
 ## Required Environment Variables
-```
-DATABASE_URL=<neon_postgresql_url>
-PGDATABASE=<database_name>
-PGHOST=<host>
-PGPASSWORD=<password>
-PGPORT=<port>
-PGUSER=<username>
-GOOGLE_MAPS_API_KEY=<google_maps_key>
-JWT_SECRET=<jwt_secret>
+
+### Backend (Railway)
+```env
+DATABASE_URL=your_neon_postgresql_url
+JWT_SECRET=your_secure_jwt_secret_minimum_32_chars
+NODE_ENV=production
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key (optional)
 ```
 
-## Package Status
-- **Dependencies**: 76 packages
-- **Security Vulnerabilities**: 4 minor (development-only)
-- **Build Ready**: ✅ Production optimized
-- **Hot Reload**: ✅ Vite HMR enabled
+### Frontend (Vercel)
+```env
+VITE_API_URL=https://your-railway-backend-url.railway.app
+```
 
-## Medical Domain Features
-- Hospital bed management (355+ beds across 4 hospitals)
-- Real-time ambulance tracking (7 vehicles)
-- Emergency request workflow
-- Patient care continuity
-- Geographic optimization for India
+## Security Features
+- ✅ Secure JWT authentication with 32+ character secret
+- ✅ Password hashing with bcrypt
+- ✅ Production error handling (no stack traces exposed)
+- ✅ Input validation and sanitization
+- ✅ CORS configuration for cross-origin requests
+- ✅ Environment-specific configurations
 
-## Performance Optimizations
-- Vite for fast builds
-- React Query caching
-- WebSocket connection pooling
-- Database connection optimization
-- Google Maps API integration
+## Production Optimizations
+- ✅ Auto-dismissing success toasts (5 seconds)
+- ✅ Error boundary implementation
+- ✅ TypeScript interfaces for API responses
+- ✅ Health check endpoints for monitoring
+- ✅ Cross-origin API request handling
+- ✅ WebSocket connection resilience
 
-Last Updated: July 12, 2025
+## Build Commands
+
+### For Railway (Backend)
+```bash
+npm install
+npm run build
+npm start
+```
+
+### For Vercel (Frontend)
+```bash
+npm install
+npm run build:client
+```
+
+## Database Requirements
+- Neon PostgreSQL database with existing schema
+- Connection string configured in Railway environment
+- Database migrations handled via Drizzle ORM
+
+## Monitoring & Health Checks
+- Health check endpoint: `GET /api/health`
+- Returns database connectivity status
+- Service uptime and version information
+- Environment and timestamp data
+
+## User Roles & Features
+1. **Patient Dashboard**: Emergency requests, hospital selection, real-time tracking
+2. **Ambulance Operator**: Request acceptance, GPS tracking, navigation
+3. **Hospital Staff**: Bed management, incoming ambulance tracking, resource allocation
+4. **Admin Dashboard**: System oversight, user management, analytics
+
+## External Dependencies
+- Google Maps API (for location services and navigation)
+- Neon PostgreSQL (database hosting)
+- Railway.com (backend hosting)
+- Vercel.com (frontend hosting)
+
+## Next Steps for Deployment
+1. Deploy backend to Railway.com with environment variables
+2. Deploy frontend to Vercel.com with API URL configuration
+3. Configure Google Maps API key when ready for production
+4. Test cross-origin WebSocket and API connections
+5. Monitor health check endpoints for system status
+
+This application is now production-ready with comprehensive security, error handling, and deployment configurations.

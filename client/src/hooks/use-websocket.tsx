@@ -51,7 +51,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     try {
       const host = window.location.host;
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
+      // Use environment variable for production API URL
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const wsHost = apiUrl ? new URL(apiUrl).host : host;
+      const wsUrl = `${protocol}//${wsHost}/ws?token=${encodeURIComponent(token)}`;
       
       console.log('🔗 WebSocket connecting to:', wsUrl);
       

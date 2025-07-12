@@ -11,7 +11,16 @@ import { z } from "zod";
 // Google Maps integration - using fetch API instead of the googlemaps package
 // This avoids ES module compatibility issues
 
-const JWT_SECRET = process.env.JWT_SECRET || "emergency-connect-secret-key";
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required for security');
+  }
+  if (secret.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters long for security');
+  }
+  return secret;
+})();
 
 // Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
@@ -73,6 +82,10 @@ const requireRole = (roles: string[]) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+
+  // Health check endpoint for Railway deployment
+  const { healthCheck } = await import('./health');
+  app.get('/api/health', healthCheck);
 
   // Set up WebSocket server on a distinct path
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

@@ -14,6 +14,7 @@ import AdminDashboard from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import { WebSocketProvider } from "@/hooks/use-websocket";
 import { RoleHeader } from "@/components/role-header";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -65,14 +66,16 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

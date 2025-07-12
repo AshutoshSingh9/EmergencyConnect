@@ -23,7 +23,11 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, {
+  // Use API base URL for cross-origin requests
+  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+
+  const res = await fetch(fullUrl, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
@@ -47,7 +51,12 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(queryKey[0] as string, {
+    // Use API base URL for cross-origin requests
+    const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    const url = queryKey[0] as string;
+    const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+
+    const res = await fetch(fullUrl, {
       headers,
       credentials: "include",
     });

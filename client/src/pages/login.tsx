@@ -31,7 +31,6 @@ export default function Login() {
       toast({
         title: "Success",
         description: "Welcome back to EmergencyConnect!",
-        duration: 5000,
       });
     } catch (error) {
       toast({
@@ -57,7 +56,6 @@ export default function Login() {
       toast({
         title: "Success",
         description: "Account created successfully! Welcome to EmergencyConnect.",
-        duration: 5000,
       });
     } catch (error) {
       toast({
@@ -85,7 +83,7 @@ export default function Login() {
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register" onClick={() => window.location.href = '/register'}>Register</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login" className="space-y-4">
@@ -119,99 +117,11 @@ export default function Login() {
               
               <TabsContent value="register" className="space-y-4">
                 <div className="text-center p-8">
-                  <p className="text-gray-600 mb-4">Creating a new account? Click the button below.</p>
+                  <p className="text-gray-600 mb-4">Creating a new account? Use our enhanced registration form.</p>
                   <Button onClick={() => window.location.href = '/register'} className="bg-blue-600 hover:bg-blue-700">
-                    Go to Registration Page
+                    Go to Enhanced Registration
                   </Button>
                 </div>
-                <form onSubmit={handleRegister} className="space-y-4" style={{display: 'none'}}>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        type="text"
-                        value={registerData.firstName}
-                        onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        type="text"
-                        value={registerData.lastName}
-                        onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      value={registerData.username}
-                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={registerData.email}
-                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={registerData.phone}
-                      onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <Select value={registerData.role} onValueChange={(value) => setRegisterData({ ...registerData, role: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="ambulance">Ambulance Operator</SelectItem>
-                        <SelectItem value="hospital">Hospital Staff</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={registerData.password}
-                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={registerData.confirmPassword}
-                      onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    {isLoading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
               </TabsContent>
             </Tabs>
             

@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { MapPin, Clock, Phone, Bed, AlertCircle, Activity, Heart, Ambulance, Hospital, Navigation, Zap, Shield, CheckCircle, X, Star, Users, CarIcon, Timer } from 'lucide-react';
+import { MapPin, Clock, Phone, Bed, AlertCircle, Activity, Heart, Ambulance, Hospital, CheckCircle, X, Star, Users, Timer } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
 export default function EnhancedPatientDashboard() {

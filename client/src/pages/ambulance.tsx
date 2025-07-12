@@ -19,7 +19,6 @@ import {
   Clock, 
   MapPin, 
   MessageSquare,
-  Navigation,
   User,
   Phone,
   X,
