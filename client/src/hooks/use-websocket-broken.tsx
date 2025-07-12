@@ -151,7 +151,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             data = JSON.parse(event.data);
           } catch (parseError1) {
             try {
-              data = eval(`(${event.data})`);
+              data = JSON.parse(event.data);
             } catch (parseError2) {
               data = { raw: event.data, type: 'fallback', timestamp: Date.now() };
             }

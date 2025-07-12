@@ -31,6 +31,7 @@ export default function Login() {
       toast({
         title: "Success",
         description: "Welcome back to EmergencyConnect!",
+        duration: 5000,
       });
     } catch (error) {
       toast({
@@ -56,6 +57,7 @@ export default function Login() {
       toast({
         title: "Success",
         description: "Account created successfully! Welcome to EmergencyConnect.",
+        duration: 5000,
       });
     } catch (error) {
       toast({
