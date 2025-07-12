@@ -470,14 +470,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: user.id,
           name: data.hospitalName,
           address: data.hospitalAddress || '',
-          latitude: 0,
-          longitude: 0,
+          latitude: "0",
+          longitude: "0",
           phone: data.phone,
           totalBeds: data.totalBeds || 0,
           availableBeds: data.totalBeds || 0,
           icuBeds: data.icuBeds || 0,
           availableIcuBeds: data.icuBeds || 0,
-          emergencyServices: data.emergencyServices || []
+          emergencyServices: Array.isArray(data.emergencyServices) ? data.emergencyServices.join(',') : (data.emergencyServices || '')
         });
         profileData.hospitalProfile = hospital;
         tokenPayload.hospitalId = hospital.id;
@@ -485,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create ambulance profile with auto-generated vehicle number and location
         console.log('🚑 Ambulance registration data:', {
           selectedHospitalId: data.selectedHospitalId,
-          operatorPhone: data.operatorPhone,
+          operatorPhone: data.phone,
           licenseNumber: data.licenseNumber,
           certification: data.certification,
           equipmentLevel: data.equipmentLevel
@@ -506,7 +506,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Created ambulance ${ambulance.vehicleNumber} for user ${user.username} assigned to hospital ID ${data.selectedHospitalId}`);
           } catch (error) {
             console.error('❌ Failed to create ambulance profile:', error);
-            throw new Error('Failed to create ambulance profile: ' + error.message);
+            let errorMessage = 'Unknown error';
+            if (error instanceof Error) {
+              errorMessage = error.message;
+            }
+            throw new Error('Failed to create ambulance profile: ' + errorMessage);
           }
         } else {
           console.log('⚠️ No hospital selected for ambulance registration');

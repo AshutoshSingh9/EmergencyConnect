@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, RefreshCw, AlertCircle } from 'lucide-react';
 import { getAuthToken } from '@/lib/auth';
+/// <reference types="@types/google.maps" />
 
 interface LocationMapProps {
   title?: string;

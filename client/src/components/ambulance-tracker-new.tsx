@@ -49,18 +49,12 @@ export function AmbulanceTracker() {
     mutationFn: async (params: { requestId: number, bedNumber: string, patientName: string }) => {
       const { requestId, bedNumber, patientName } = params;
       // Update emergency request status to completed
-      await apiRequest(`/api/emergency/requests/${requestId}`, {
-        method: 'PUT',
-        body: { status: 'completed' }
-      });
+      await apiRequest('PUT', `/api/emergency/requests/${requestId}`, { status: 'completed' });
       
       // Update bed status to occupied with patient name
-      await apiRequest(`/api/hospitals/beds/${bedNumber}/assign`, {
-        method: 'PUT',
-        body: { 
-          status: 'occupied',
-          patientName: patientName
-        }
+      await apiRequest('PUT', `/api/hospitals/beds/${bedNumber}/assign`, { 
+        status: 'occupied',
+        patientName: patientName
       });
     },
     onSuccess: () => {
@@ -78,10 +72,7 @@ export function AmbulanceTracker() {
 
   const cancelDispatchMutation = useMutation({
     mutationFn: async (requestId: number) => {
-      await apiRequest(`/api/emergency/requests/${requestId}`, {
-        method: 'PUT',
-        body: { status: 'cancelled' }
-      });
+      await apiRequest('PUT', `/api/emergency/requests/${requestId}`, { status: 'cancelled' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/emergency/requests'] });
@@ -311,13 +302,13 @@ export function AmbulanceTracker() {
                   <SelectValue placeholder="Choose an available bed" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(availableBeds).map(([wardName, beds]: [string, any[]]) => (
-                    beds.map((bed) => (
+                  {Object.entries(availableBeds).map(([wardName, beds]) =>
+                    (Array.isArray(beds) ? beds : []).map((bed: any) => (
                       <SelectItem key={bed.bedNumber} value={bed.bedNumber}>
                         {bed.bedNumber} - {wardName}
                       </SelectItem>
                     ))
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>

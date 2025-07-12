@@ -80,16 +80,16 @@ export function HospitalBedLayout({ hospitalId, onBedUpdate }: HospitalBedLayout
         'MED-103': 'Sunita Verma',
         'SUR-201': 'Vikram Singh',
         'SUR-203': 'Meera Gupta',
-        
+
         // CARE CHL Hospital
-        'NICU-01': 'Baby Krishna',
+        // 'NICU-01': 'Baby Krishna', // Duplicate key removed
         'NICU-03': 'Baby Lakshmi',
-        'CCU-01': 'Ramesh Jain',
+        // 'CCU-01': 'Ramesh Jain', // Duplicate key removed
         'PED-401': 'Little Arjun',
         'PED-403': 'Little Shreya',
         'CAR-502': 'Sushma Devi',
         'GEN-601': 'Dinesh Kumar',
-        
+
         // Bombay Hospital
         'CCU-B1': 'Deepak Agarwal',
         'CCU-B3': 'Ritu Malhotra',
@@ -129,6 +129,9 @@ export function HospitalBedLayout({ hospitalId, onBedUpdate }: HospitalBedLayout
         }
       };
 
+      if (!Array.isArray(bedStatusData)) {
+        return [];
+      }
       return bedStatusData.map((bedStatus: any, index: number) => {
         const wardPrefix = bedStatus.bedNumber.split('-')[0];
         const wardInfo = wardMappings[hospitalId]?.[wardPrefix] || { ward: 'General Ward', floor: 1 };
@@ -147,59 +150,6 @@ export function HospitalBedLayout({ hospitalId, onBedUpdate }: HospitalBedLayout
 
     setBeds(generateBedsFromServerData());
   }, [hospitalId, bedStatusData, bedStatusLoading]);
-      
-      // CARE CHL Hospital Indore (ID: 3) - Advanced Care
-      if (hospitalId === 3) {
-        return [
-          // ICU Beds - NICU & Critical Care
-          { id: 'icu-1', number: 'NICU-01', status: 'occupied', ward: 'NICU', type: 'icu', floor: 4, patientName: 'Baby Krishna' },
-          { id: 'icu-2', number: 'NICU-02', status: 'available', ward: 'NICU', type: 'icu', floor: 4 },
-          { id: 'icu-3', number: 'NICU-03', status: 'occupied', ward: 'NICU', type: 'icu', floor: 4, patientName: 'Baby Lakshmi' },
-          { id: 'icu-4', number: 'ICU-01', status: 'available', ward: 'Critical Care ICU', type: 'icu', floor: 3 },
-          { id: 'icu-5', number: 'ICU-02', status: 'occupied', ward: 'Critical Care ICU', type: 'icu', floor: 3, patientName: 'Ramesh Joshi' },
-          // General Beds - Specialized Wards
-          { id: 'gen-1', number: 'MED-301', status: 'occupied', ward: 'Medical Ward', type: 'general', floor: 1, patientName: 'Kavita Rao' },
-          { id: 'gen-2', number: 'MED-302', status: 'available', ward: 'Medical Ward', type: 'general', floor: 1 },
-          { id: 'gen-3', number: 'MED-303', status: 'occupied', ward: 'Medical Ward', type: 'general', floor: 1, patientName: 'Suresh Modi' },
-          { id: 'gen-4', number: 'MED-304', status: 'available', ward: 'Medical Ward', type: 'general', floor: 1 },
-          { id: 'gen-5', number: 'SUR-401', status: 'available', ward: 'Surgical Ward', type: 'general', floor: 2 },
-          { id: 'gen-6', number: 'SUR-402', status: 'occupied', ward: 'Surgical Ward', type: 'general', floor: 2, patientName: 'Anita Desai' },
-          { id: 'gen-7', number: 'SUR-403', status: 'available', ward: 'Surgical Ward', type: 'general', floor: 2 },
-          { id: 'gen-8', number: 'SUR-404', status: 'reserved', ward: 'Surgical Ward', type: 'general', floor: 2 },
-          { id: 'gen-9', number: 'EMR-001', status: 'available', ward: 'Emergency Ward', type: 'general', floor: 0 },
-          { id: 'gen-10', number: 'EMR-002', status: 'available', ward: 'Emergency Ward', type: 'general', floor: 0 }
-        ];
-      }
-      
-      // Bombay Hospital Indore (ID: 4) - Specialized Care
-      if (hospitalId === 4) {
-        return [
-          // ICU Beds - Specialized ICUs
-          { id: 'icu-1', number: 'CCU-B1', status: 'occupied', ward: 'Coronary Care Unit', type: 'icu', floor: 3, patientName: 'Deepak Agarwal' },
-          { id: 'icu-2', number: 'CCU-B2', status: 'available', ward: 'Coronary Care Unit', type: 'icu', floor: 3 },
-          { id: 'icu-3', number: 'CCU-B3', status: 'occupied', ward: 'Coronary Care Unit', type: 'icu', floor: 3, patientName: 'Ritu Malhotra' },
-          { id: 'icu-4', number: 'NICU-B1', status: 'available', ward: 'Neuro ICU', type: 'icu', floor: 4 },
-          { id: 'icu-5', number: 'NICU-B2', status: 'reserved', ward: 'Neuro ICU', type: 'icu', floor: 4 },
-          // General Beds - Specialty Wards
-          { id: 'gen-1', number: 'ORT-501', status: 'occupied', ward: 'Orthopedic Ward', type: 'general', floor: 2, patientName: 'Manoj Tiwari' },
-          { id: 'gen-2', number: 'ORT-502', status: 'available', ward: 'Orthopedic Ward', type: 'general', floor: 2 },
-          { id: 'gen-3', number: 'ORT-503', status: 'available', ward: 'Orthopedic Ward', type: 'general', floor: 2 },
-          { id: 'gen-4', number: 'NEU-601', status: 'occupied', ward: 'Neurology Ward', type: 'general', floor: 4, patientName: 'Sanjay Khanna' },
-          { id: 'gen-5', number: 'NEU-602', status: 'available', ward: 'Neurology Ward', type: 'general', floor: 4 },
-          { id: 'gen-6', number: 'GEN-701', status: 'available', ward: 'General Medicine', type: 'general', floor: 1 },
-          { id: 'gen-7', number: 'GEN-702', status: 'occupied', ward: 'General Medicine', type: 'general', floor: 1, patientName: 'Geeta Saxena' },
-          { id: 'gen-8', number: 'GEN-703', status: 'available', ward: 'General Medicine', type: 'general', floor: 1 },
-          { id: 'gen-9', number: 'DIAL-001', status: 'occupied', ward: 'Dialysis Unit', type: 'general', floor: 0, patientName: 'Harish Pandey' },
-          { id: 'gen-10', number: 'DIAL-002', status: 'available', ward: 'Dialysis Unit', type: 'general', floor: 0 }
-        ];
-      }
-      
-      return [];
-
-    };
-
-    setBeds(generateStaticBeds());
-  }, [hospitalId]);
 
   const updateBedStatus = (bedId: string, newStatus: 'available' | 'occupied' | 'reserved') => {
     setBeds(prev => {
@@ -278,7 +228,7 @@ export function HospitalBedLayout({ hospitalId, onBedUpdate }: HospitalBedLayout
   };
 
   const stats = getStats();
-  const uniqueWards = [...new Set(beds.map(b => b.ward))];
+  const uniqueWards = Array.from(new Set(beds.map(b => b.ward)));
 
   const config = getHospitalConfig(hospitalId);
   
