@@ -280,28 +280,30 @@ export default function EnhancedAmbulanceDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
       {/* Enhanced Header with Ambulance Info */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ambulance Dashboard</h1>
-          <div className="flex items-center space-x-4 mt-2">
-            <p className="text-gray-600">Vehicle: {ambulanceProfile.vehicleNumber}</p>
-            <Badge className="bg-blue-100 text-blue-800">
-              <Shield className="h-3 w-3 mr-1" />
-              {getEquipmentLevel()}
-            </Badge>
-            <Badge className={ambulanceProfile.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-              {ambulanceProfile.isActive ? 'Active' : 'Inactive'}
-            </Badge>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Ambulance Dashboard</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-2 space-y-2 sm:space-y-0">
+            <p className="text-sm sm:text-base text-gray-600">Vehicle: {ambulanceProfile?.vehicleNumber || 'Unknown'}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-blue-100 text-blue-800 text-xs sm:text-sm">
+                <Shield className="h-3 w-3 mr-1" />
+                {getEquipmentLevel()}
+              </Badge>
+              <Badge className={`text-xs sm:text-sm ${(ambulanceProfile?.isActive) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                {(ambulanceProfile?.isActive) ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <Badge className={`${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Badge className={`text-xs sm:text-sm ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
             <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
             {isConnected ? 'Connected' : 'Disconnected'}
           </Badge>
-          <NotificationSystem userRole="ambulance" userId={user.id} />
+          <NotificationSystem userRole="ambulance" userId={user?.id || 0} />
         </div>
       </div>
 
@@ -310,30 +312,30 @@ export default function EnhancedAmbulanceDashboard() {
         <Alert className="border-l-4 border-l-blue-500 bg-blue-50">
           <NavigationIcon className="h-4 w-4" />
           <AlertDescription>
-            <div className="flex justify-between items-center">
-              <div>
-                <strong>Active Emergency</strong> - {activeRequest.type?.replace('_', ' ')} 
-                <span className="ml-2">Status: {activeRequest.status.replace('_', ' ').toUpperCase()}</span>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+              <div className="flex-1">
+                <strong>Active Emergency</strong> - {(activeRequest.type || 'general_emergency').replace('_', ' ')} 
+                <span className="ml-2">Status: {(activeRequest.status || 'pending').replace('_', ' ').toUpperCase()}</span>
                 {currentETA && <span className="ml-2 font-medium">ETA: {currentETA} min</span>}
               </div>
-              <div className="flex space-x-2">
-                {activeRequest.status === 'accepted' && (
-                  <Button size="sm" onClick={handleJourneyStart}>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                {(activeRequest.status || 'pending') === 'accepted' && (
+                  <Button size="sm" onClick={handleJourneyStart} className="w-full sm:w-auto">
                     Start Journey
                   </Button>
                 )}
-                {activeRequest.status === 'en_route' && (
-                  <Button size="sm" onClick={() => handleStatusUpdate('at_scene')}>
+                {(activeRequest.status || 'pending') === 'en_route' && (
+                  <Button size="sm" onClick={() => handleStatusUpdate('at_scene')} className="w-full sm:w-auto">
                     Arrived at Scene
                   </Button>
                 )}
-                {activeRequest.status === 'at_scene' && (
-                  <Button size="sm" onClick={() => handleStatusUpdate('transporting')}>
+                {(activeRequest.status || 'pending') === 'at_scene' && (
+                  <Button size="sm" onClick={() => handleStatusUpdate('transporting')} className="w-full sm:w-auto">
                     Transporting Patient
                   </Button>
                 )}
-                {activeRequest.status === 'transporting' && (
-                  <Button size="sm" onClick={() => handleStatusUpdate('completed')}>
+                {(activeRequest.status || 'pending') === 'transporting' && (
+                  <Button size="sm" onClick={() => handleStatusUpdate('completed')} className="w-full sm:w-auto">
                     Complete Request
                   </Button>
                 )}
@@ -345,25 +347,25 @@ export default function EnhancedAmbulanceDashboard() {
 
       {/* Current Location Map */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MapPin className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+            <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Current Location</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Your ambulance location and nearby area
           </CardDescription>
           {location && (
-            <div className="text-sm text-gray-600 mt-2">
+            <div className="text-xs sm:text-sm text-gray-600 mt-2 space-y-1">
               <div>Latitude: {location.latitude.toFixed(6)}</div>
               <div>Longitude: {location.longitude.toFixed(6)}</div>
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <LocationMap 
             title="Ambulance Current Location"
-            height="300px"
+            height="250px"
             showRefreshButton={true}
             showCurrentAmbulance={true}
             currentAmbulanceId={(() => {
@@ -373,61 +375,61 @@ export default function EnhancedAmbulanceDashboard() {
             })()}
             showAllAmbulances={false}
             patientLocation={activeRequest ? {
-              latitude: parseFloat(activeRequest.latitude),
-              longitude: parseFloat(activeRequest.longitude)
+              latitude: parseFloat(activeRequest.latitude || '0'),
+              longitude: parseFloat(activeRequest.longitude || '0')
             } : undefined}
           />
         </CardContent>
       </Card>
 
       {/* Statistics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:pt-6 sm:px-6 sm:pb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Requests</p>
-                <p className="text-3xl font-bold text-blue-600">{pendingRequests.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Requests</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">{pendingRequests.length}</p>
               </div>
-              <Timer className="h-8 w-8 text-blue-600" />
+              <Timer className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:pt-6 sm:px-6 sm:pb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completed Today</p>
-                <p className="text-3xl font-bold text-green-600">{emergencyRequests.filter((r: any) => r.status === 'completed').length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Completed Today</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">{emergencyRequests.filter((r: any) => (r.status || 'pending') === 'completed').length}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:pt-6 sm:px-6 sm:pb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Hospital</p>
-                <p className="text-lg font-semibold text-gray-900">{ambulanceProfile.hospitalAffiliation || 'N/A'}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Hospital</p>
+                <p className="text-sm sm:text-lg font-semibold text-gray-900">{ambulanceProfile?.hospitalAffiliation || 'N/A'}</p>
               </div>
-              <Truck className="h-8 w-8 text-purple-600" />
+              <Truck className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:pt-6 sm:px-6 sm:pb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Current Status</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {activeRequest ? activeRequest.status.replace('_', ' ') : 'Available'}
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Current Status</p>
+                <p className="text-sm sm:text-lg font-semibold text-gray-900">
+                  {activeRequest ? (activeRequest.status || 'pending').replace('_', ' ') : 'Available'}
                 </p>
               </div>
-              <Gauge className="h-8 w-8 text-indigo-600" />
+              <Gauge className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
@@ -436,22 +438,21 @@ export default function EnhancedAmbulanceDashboard() {
       {/* Navigation Map for Active Request */}
       {activeRequest && location && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <NavigationIcon className="h-5 w-5" />
-              <span>Navigation to Emergency (Request #{activeRequest.id})</span>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+              <NavigationIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-sm sm:text-base">Navigation to Emergency (Request #{activeRequest.id})</span>
             </CardTitle>
-            <CardDescription>
-              Navigate to patient location: {activeRequest.address}
+            <CardDescription className="text-sm sm:text-base">
+              Navigate to patient location: {activeRequest.address || 'Location not provided'}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-
+          <CardContent className="p-4 sm:p-6">
             <NavigationMap
               ambulanceLocation={location}
               patientLocation={{
-                latitude: parseFloat(activeRequest.latitude),
-                longitude: parseFloat(activeRequest.longitude)
+                latitude: parseFloat(activeRequest.latitude || '0'),
+                longitude: parseFloat(activeRequest.longitude || '0')
               }}
               onStartJourney={handleJourneyStart}
               onJourneyUpdate={handleJourneyUpdate}
@@ -463,19 +464,19 @@ export default function EnhancedAmbulanceDashboard() {
 
       {/* Pending Emergency Requests */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex flex-wrap items-center gap-2 text-lg sm:text-xl">
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Pending Emergency Requests</span>
             {pendingRequests.length > 0 && (
-              <Badge className="bg-red-100 text-red-800">{pendingRequests.length}</Badge>
+              <Badge className="bg-red-100 text-red-800 text-xs sm:text-sm">{pendingRequests.length}</Badge>
             )}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Emergency requests waiting for ambulance assignment
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           {pendingRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />

@@ -48,13 +48,18 @@ export default function EnhancedPatientDashboard() {
   const hospitalsQuery = useQuery({
     queryKey: ['/api/hospitals/nearby', location?.latitude, location?.longitude],
     enabled: !!location,
-    staleTime: 5 * 60 * 1000, 
+    staleTime: 10 * 60 * 1000, // Cache hospitals for 10 minutes
+    cacheTime: 30 * 60 * 1000, // Keep in memory for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window gets focus
   });
 
   const emergencyRequestsQuery = useQuery({
     queryKey: ['/api/emergency/requests'],
     enabled: !!user?.id,
-    refetchInterval: 3000, 
+    refetchInterval: 8000, // Reduced frequency for faster loading
+    refetchIntervalInBackground: false,
+    staleTime: 5000, // Consider data fresh for 5 seconds
+    cacheTime: 300000, // Cache for 5 minutes
   });
 
   const hospitals = hospitalsQuery.data || [];
@@ -62,6 +67,24 @@ export default function EnhancedPatientDashboard() {
   
   // Debugging can be enabled by uncommenting the line below
   // console.log('🔍 Emergency requests loaded:', emergencyRequests.length);
+  
+  // Debug ambulance data when requests have ambulances assigned
+  useEffect(() => {
+    if (emergencyRequests.length > 0) {
+      emergencyRequests.forEach((req: any) => {
+        if (req.ambulanceId && req.ambulance) {
+          console.log('🚑 Debug ambulance data for request', req.id, ':', {
+            ambulanceId: req.ambulanceId,
+            vehicleNumber: req.ambulance?.vehicleNumber,
+            operatorPhone: req.ambulance?.operatorPhone,
+            ambulanceContact: req.ambulanceContact,
+            certification: req.ambulance?.certification,
+            status: req.status
+          });
+        }
+      });
+    }
+  }, [emergencyRequests]);
   
   const activeRequest = emergencyRequests.find((req: any) => 
     ['pending', 'accepted', 'dispatched', 'en_route'].includes(req.status)
@@ -192,19 +215,19 @@ export default function EnhancedPatientDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
       {/* Enhanced Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Patient Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user.name || user.username}</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Patient Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Welcome back, {user?.name || user?.username || 'Patient'}</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <Badge className={`${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Badge className={`text-xs sm:text-sm ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
             <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
             {isConnected ? 'Connected' : 'Disconnected'}
           </Badge>
-          <NotificationSystem userRole="patient" userId={user.id} />
+          <NotificationSystem userRole="patient" userId={user?.id || 0} />
         </div>
       </div>
 
@@ -213,9 +236,9 @@ export default function EnhancedPatientDashboard() {
         <Alert className="border-l-4 border-l-red-500 bg-red-50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <div className="flex justify-between items-center">
-              <div>
-                <strong>Active Emergency Request</strong> - Status: {activeRequest.status.replace('_', ' ').toUpperCase()}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+              <div className="flex-1">
+                <strong>Active Emergency Request</strong> - Status: {(activeRequest.status || 'pending').replace('_', ' ').toUpperCase()}
                 {ambulanceETA[activeRequest.id] && (
                   <span className="ml-2 font-medium">ETA: {ambulanceETA[activeRequest.id]} minutes</span>
                 )}
@@ -225,7 +248,7 @@ export default function EnhancedPatientDashboard() {
                 size="sm"
                 onClick={() => cancelMutation.mutate(activeRequest.id)}
                 disabled={cancelMutation.isPending}
-                className="ml-4"
+                className="w-full sm:w-auto sm:ml-4"
               >
                 Cancel Request
               </Button>
@@ -236,38 +259,38 @@ export default function EnhancedPatientDashboard() {
 
       {/* Quick Emergency Request */}
       <Card className="border-l-4 border-l-red-500">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-red-600">
-            <AlertCircle className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center space-x-2 text-red-600 text-lg sm:text-xl">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Emergency Request</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Request immediate medical assistance
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
             <DialogTrigger asChild>
               <Button 
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg" 
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-4 sm:py-6 text-base sm:text-lg" 
                 disabled={!!activeRequest}
               >
-                <AlertCircle className="h-6 w-6 mr-2" />
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
                 Request Emergency Assistance
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Emergency Request Details</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-lg sm:text-xl">Emergency Request Details</DialogTitle>
+                <DialogDescription className="text-sm sm:text-base">
                   Please provide information about your emergency
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 p-1">
                 <div>
-                  <Label htmlFor="emergency-type">Emergency Type</Label>
-                  <Select value={emergencyType} onValueChange={setEmergencyType}>
-                    <SelectTrigger>
+                  <Label htmlFor="emergency-type" className="text-sm sm:text-base">Emergency Type</Label>
+                  <Select value={emergencyType || ""} onValueChange={setEmergencyType}>
+                    <SelectTrigger className="h-10 sm:h-12">
                       <SelectValue placeholder="Select emergency type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -284,13 +307,13 @@ export default function EnhancedPatientDashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
                   <Textarea
                     id="description"
                     placeholder="Describe the emergency situation..."
-                    value={emergencyDescription}
+                    value={emergencyDescription || ""}
                     onChange={(e) => setEmergencyDescription(e.target.value)}
-                    className="min-h-[100px]"
+                    className="min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
                   />
                 </div>
 
@@ -377,16 +400,16 @@ export default function EnhancedPatientDashboard() {
 
       {/* Request History with Enhanced Details */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Activity className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Emergency Request History</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Track your emergency requests and their status
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           {emergencyRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Heart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -396,19 +419,19 @@ export default function EnhancedPatientDashboard() {
             <div className="space-y-4">
               {emergencyRequests.map((request: any) => (
                 <Card key={request.id} className={`border-l-4 ${
-                  request.priority === 'critical' ? 'border-l-red-500' : 
-                  request.priority === 'high' ? 'border-l-orange-500' : 
+                  (request.priority || 'medium') === 'critical' ? 'border-l-red-500' : 
+                  (request.priority || 'medium') === 'high' ? 'border-l-orange-500' : 
                   'border-l-blue-500'
                 }`}>
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
+                  <CardContent className="p-4 sm:pt-6 sm:px-6 sm:pb-6">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <Badge className={getStatusColor(request.status)}>
-                            {request.status.replace('_', ' ').toUpperCase()}
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <Badge className={getStatusColor(request.status || 'pending')}>
+                            {(request.status || 'pending').replace('_', ' ').toUpperCase()}
                           </Badge>
-                          <Badge className={getPriorityColor(request.priority)}>
-                            {request.priority.toUpperCase()}
+                          <Badge className={getPriorityColor(request.priority || 'medium')}>
+                            {(request.priority || 'medium').toUpperCase()}
                           </Badge>
                           {ambulanceETA[request.id] && (
                             <Badge className="bg-blue-100 text-blue-800">
@@ -418,15 +441,15 @@ export default function EnhancedPatientDashboard() {
                           )}
                         </div>
                         
-                        <p className="text-sm text-gray-600 mb-2">{request.description}</p>
+                        <p className="text-sm text-gray-600 mb-2">{request.description || 'No description provided'}</p>
                         
                         {request.type && (
                           <p className="text-xs text-gray-500 mb-2">
-                            <span className="font-medium">Type:</span> {request.type.replace('_', ' ')}
+                            <span className="font-medium">Type:</span> {(request.type || 'general').replace('_', ' ')}
                           </p>
                         )}
                         
-                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm text-gray-500">
                           <span className="flex items-center">
                             <Clock className="h-4 w-4 mr-1" />
                             {format(new Date(request.createdAt), 'MMM dd, yyyy HH:mm')}
@@ -434,7 +457,7 @@ export default function EnhancedPatientDashboard() {
                           {request.ambulanceId && (
                             <span className="flex items-center">
                               <Ambulance className="h-4 w-4 mr-1" />
-                              Ambulance #{request.ambulanceId}
+                              {request.ambulance?.vehicleNumber || `Ambulance #${request.ambulanceId}`}
                             </span>
                           )}
                           {request.hospitalId && (
@@ -457,6 +480,31 @@ export default function EnhancedPatientDashboard() {
                           )}
                         </div>
 
+                        {/* Ambulance Contact Information - CRITICAL FIX */}
+                        {request.ambulanceId && request.ambulance && ['accepted', 'dispatched', 'en_route', 'at_scene', 'transporting'].includes(request.status || 'pending') && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center text-blue-800 font-medium">
+                                <Phone className="h-4 w-4 mr-2" />
+                                <span>Ambulance Contact</span>
+                              </div>
+                              <Badge className="bg-blue-100 text-blue-800">
+                                {request.ambulance.vehicleNumber || `AMB-${request.ambulanceId}`}
+                              </Badge>
+                            </div>
+                            <div className="mt-2 space-y-1">
+                              <div className="flex items-center text-sm text-blue-700">
+                                <Phone className="h-3 w-3 mr-2" />
+                                <span className="font-medium">Operator: {request.ambulance?.operatorPhone || request.ambulanceContact || 'Contact being updated...'}</span>
+                              </div>
+                              <div className="flex items-center text-sm text-blue-600">
+                                <Shield className="h-3 w-3 mr-2" />
+                                <span>{request.ambulance.certification || 'Basic Life Support'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Bed Assignment Information */}
                         {request.status === 'completed' && request.assignedBedNumber && (
                           <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -472,25 +520,25 @@ export default function EnhancedPatientDashboard() {
                         )}
                       </div>
                       
-                      <div className="flex space-x-2 ml-4">
-                        {['pending', 'accepted', 'dispatched', 'en_route'].includes(request.status) && (
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:ml-4">
+                        {['pending', 'accepted', 'dispatched', 'en_route'].includes(request.status || 'pending') && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => cancelMutation.mutate(request.id)}
                             disabled={cancelMutation.isPending}
-                            className="text-orange-600 hover:text-orange-700"
+                            className="text-orange-600 hover:text-orange-700 w-full sm:w-auto"
                           >
                             Cancel
                           </Button>
                         )}
-                        {['completed', 'cancelled'].includes(request.status) && (
+                        {['completed', 'cancelled'].includes(request.status || 'pending') && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => deleteMutation.mutate(request.id)}
                             disabled={deleteMutation.isPending}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 w-full sm:w-auto"
                           >
                             <X className="h-3 w-3 mr-1" />
                             Delete
@@ -508,19 +556,19 @@ export default function EnhancedPatientDashboard() {
 
       {/* Enhanced Location Map */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MapPin className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+            <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Emergency Services Map</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             View your location, nearby hospitals, and ambulance positions
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <LocationMap 
             title="Emergency Services Near You"
-            height="500px"
+            height="400px"
             showRefreshButton={true}
             showCurrentAmbulance={false}
             showAllAmbulances={true}

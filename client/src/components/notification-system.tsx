@@ -31,103 +31,125 @@ export function NotificationSystem({ userRole, userId }: NotificationSystemProps
 
   // Handle incoming WebSocket messages and convert to notifications
   useEffect(() => {
-    if (lastMessage) {
+    if (lastMessage && lastMessage.event && lastMessage.data) {
       const { event, data } = lastMessage;
       let newNotification: Notification | null = null;
 
-      switch (event) {
-        case 'new_emergency_request':
-          if (userRole === 'ambulance') {
-            newNotification = {
-              id: `emergency-${data.id}-${Date.now()}`,
-              type: 'emergency',
-              title: 'New Emergency Request',
-              message: `${data.patientCondition} - ${data.address}`,
-              priority: data.priority || 'high',
-              timestamp: new Date(),
-              read: false,
-              actionable: true,
-              data
-            };
-          }
-          break;
+      try {
+        switch (event) {
+          case 'new_emergency_request':
+            if (userRole === 'ambulance' && data?.id) {
+              newNotification = {
+                id: `emergency-${data.id}-${Date.now()}`,
+                type: 'emergency',
+                title: 'New Emergency Request',
+                message: `${data?.patientCondition || 'Emergency'} - ${data?.address || 'Location not provided'}`,
+                priority: data?.priority || 'high',
+                timestamp: new Date(),
+                read: false,
+                actionable: true,
+                data
+              };
+            }
+            break;
 
-        case 'ambulance_response':
-          if (userRole === 'patient' && data.patientId === userId) {
-            newNotification = {
-              id: `ambulance-${data.id}-${Date.now()}`,
-              type: 'ambulance',
-              title: data.status === 'accepted' ? 'Ambulance Dispatched' : 'Request Update',
-              message: data.status === 'accepted' 
-                ? 'Emergency services are on their way to your location'
-                : 'Your emergency request status has been updated',
-              priority: data.status === 'accepted' ? 'high' : 'medium',
-              timestamp: new Date(),
-              read: false,
-              actionable: false,
-              data
-            };
-          }
-          break;
+          case 'ambulance_response':
+            if (userRole === 'patient' && data?.patientId === userId && data?.id) {
+              newNotification = {
+                id: `ambulance-${data.id}-${Date.now()}`,
+                type: 'ambulance',
+                title: (data?.status === 'accepted') ? 'Ambulance Dispatched' : 'Request Update',
+                message: (data?.status === 'accepted') 
+                  ? 'Emergency services are on their way to your location'
+                  : 'Your emergency request status has been updated',
+                priority: (data?.status === 'accepted') ? 'high' : 'medium',
+                timestamp: new Date(),
+                read: false,
+                actionable: false,
+                data
+              };
+            }
+            break;
 
-        case 'emergency_status_update':
-          newNotification = {
-            id: `status-${data.requestId}-${Date.now()}`,
-            type: 'emergency',
-            title: 'Emergency Status Update',
-            message: `Emergency request status: ${data.status}`,
-            priority: 'medium',
-            timestamp: new Date(),
-            read: false,
-            actionable: false,
-            data
-          };
-          break;
+          case 'emergency_status_update':
+            if (data?.requestId) {
+              newNotification = {
+                id: `status-${data.requestId}-${Date.now()}`,
+                type: 'emergency',
+                title: 'Emergency Status Update',
+                message: `Emergency request status: ${data?.status || 'updated'}`,
+                priority: 'medium',
+                timestamp: new Date(),
+                read: false,
+                actionable: false,
+                data
+              };
+            }
+            break;
 
-        case 'new_message':
-          if (data.receiverId === userId && data.receiverRole === userRole) {
-            newNotification = {
-              id: `message-${data.id}-${Date.now()}`,
-              type: 'communication',
-              title: 'New Message',
-              message: `${data.senderRole}: ${data.message.substring(0, 50)}...`,
-              priority: 'medium',
-              timestamp: new Date(),
-              read: false,
-              actionable: true,
-              data
-            };
-          }
-          break;
+          case 'new_message':
+            if (data?.receiverId === userId && data?.receiverRole === userRole && data?.id) {
+              newNotification = {
+                id: `message-${data.id}-${Date.now()}`,
+                type: 'communication',
+                title: 'New Message',
+                message: `${data?.senderRole || 'User'}: ${(data?.message || '').substring(0, 50)}...`,
+                priority: 'medium',
+                timestamp: new Date(),
+                read: false,
+                actionable: true,
+                data
+              };
+            }
+            break;
 
-        case 'hospital_bed_update':
-          if (userRole === 'ambulance') {
-            newNotification = {
-              id: `bed-${data.hospitalId}-${Date.now()}`,
-              type: 'hospital',
-              title: 'Hospital Bed Availability',
-              message: `${data.hospitalName}: ${data.availableBeds} beds available`,
-              priority: 'low',
-              timestamp: new Date(),
-              read: false,
-              actionable: false,
-              data
-            };
-          }
-          break;
-      }
+          case 'hospital_bed_update':
+            if (userRole === 'ambulance' && data?.hospitalId) {
+              newNotification = {
+                id: `bed-${data.hospitalId}-${Date.now()}`,
+                type: 'hospital',
+                title: 'Hospital Bed Availability',
+                message: `${data?.hospitalName || 'Hospital'}: ${data?.availableBeds || 0} beds available`,
+                priority: 'low',
+                timestamp: new Date(),
+                read: false,
+                actionable: false,
+                data
+              };
+            }
+            break;
 
-      if (newNotification) {
-        setNotifications(prev => [newNotification!, ...prev].slice(0, 20)); // Keep last 20 notifications
-        
-        // Show toast for critical/high priority notifications
-        if (newNotification.priority === 'critical' || newNotification.priority === 'high') {
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-            variant: newNotification.priority === 'critical' ? 'destructive' : 'default',
-          });
+          default:
+            // Unknown message type, create generic notification
+            if (data && event) {
+              newNotification = {
+                id: `generic-${Date.now()}`,
+                type: 'communication',
+                title: 'System Notification',
+                message: `Received: ${event}`,
+                priority: 'low',
+                timestamp: new Date(),
+                read: false,
+                actionable: false,
+                data
+              };
+            }
         }
+
+        if (newNotification) {
+          setNotifications(prev => [newNotification!, ...prev].slice(0, 20)); // Keep last 20 notifications
+          
+          // Show toast for critical/high priority notifications
+          if (newNotification.priority === 'critical' || newNotification.priority === 'high') {
+            toast({
+              title: newNotification.title,
+              description: newNotification.message,
+              variant: newNotification.priority === 'critical' ? 'destructive' : 'default',
+            });
+          }
+        }
+      } catch (error) {
+        console.warn('Notification processing error:', error);
       }
     }
   }, [lastMessage, userRole, userId, toast]);

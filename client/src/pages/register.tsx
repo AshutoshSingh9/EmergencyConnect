@@ -219,10 +219,10 @@ export default function Register() {
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-900 flex items-center justify-center space-x-2">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-2 sm:p-4 lg:p-6">
+      <Card className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
+        <CardHeader className="text-center p-4 sm:p-6">
+          <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center justify-center space-x-2">
             <UserPlus className="w-8 h-8 text-blue-600" />
             <span>Join EmergencyConnect v3.0</span>
           </CardTitle>

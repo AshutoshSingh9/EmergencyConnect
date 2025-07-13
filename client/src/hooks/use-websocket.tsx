@@ -21,6 +21,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastMessage, setLastMessage] = useState<any>(null);
   
+  // TEMPORARY: Disable WebSocket to prevent infinite error loop
+  const [websocketDisabled] = useState(true);
+  
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldConnectRef = useRef(true);
@@ -28,6 +31,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const isConnectingRef = useRef(false);
 
   const connect = () => {
+    // TEMPORARY: WebSocket disabled to prevent error spam
+    if (websocketDisabled) {
+      console.log('🚫 WebSocket temporarily disabled');
+      return;
+    }
+    
     // Prevent multiple simultaneous connections
     if (isConnectingRef.current || !shouldConnectRef.current) {
       return;
@@ -35,12 +44,18 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     
     const token = getAuthToken();
     if (!token) {
-      setTimeout(connect, 2000);
       return;
     }
 
     // Prevent connecting if already connected
     if (socketRef.current?.readyState === WebSocket.OPEN || socketRef.current?.readyState === WebSocket.CONNECTING) {
+      return;
+    }
+
+    // Limit connection attempts to prevent infinite loop
+    if (connectionAttempts >= 3) {
+      console.log('🛑 Max WebSocket connection attempts reached. Stopping reconnection.');
+      shouldConnectRef.current = false;
       return;
     }
 
@@ -58,6 +73,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       
       console.log('🔗 WebSocket connecting to:', wsUrl);
       
+      // Create WebSocket with error handling
       const newSocket = new WebSocket(wsUrl);
       socketRef.current = newSocket;
 
@@ -85,23 +101,34 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
       newSocket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
-          if (data.type !== 'pong') {
-            console.log('📥 Message received:', data);
-            setLastMessage({ ...data, timestamp: Date.now() });
+          if (event?.data) {
+            const data = JSON.parse(event.data);
+            if (data?.type !== 'pong') {
+              console.log('📥 Message received:', data);
+              setLastMessage({ ...data, timestamp: Date.now() });
+            }
           }
         } catch (error) {
-          console.warn('Message parse error:', error);
-          setLastMessage({ 
-            type: 'parse_error', 
-            rawData: event.data, 
-            timestamp: Date.now() 
-          });
+          console.warn('Message parse error:', error, event?.data);
+          // Only set parse error if we have actual data
+          if (event?.data) {
+            setLastMessage({ 
+              type: 'parse_error', 
+              rawData: event.data, 
+              timestamp: Date.now() 
+            });
+          }
         }
       };
 
       newSocket.onerror = (error) => {
-        console.warn('⚠️ WebSocket error:', error);
+        // Reduce console spam - only log every 5th error
+        if (connectionAttempts % 5 === 0) {
+          console.log('❌ WebSocket connection error (attempt', connectionAttempts, ')');
+        }
+        setIsConnected(false);
+        setIsConnecting(false);
+        isConnectingRef.current = false;
       };
 
       newSocket.onclose = (event) => {
@@ -116,37 +143,48 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           clearTimeout(reconnectTimeoutRef.current);
         }
         
-        // Reconnect if should connect and not a normal closure
-        if (shouldConnectRef.current && event.code !== 1000) {
-          const delay = Math.min(1000 * Math.pow(1.5, connectionAttempts), 10000);
+        // Reconnect if should connect and not a normal closure, with max attempts
+        if (shouldConnectRef.current && event.code !== 1000 && connectionAttempts < 5) {
+          const delay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000);
           reconnectTimeoutRef.current = setTimeout(() => {
-            if (shouldConnectRef.current) {
+            if (shouldConnectRef.current && connectionAttempts < 5) {
               connect();
             }
           }, delay);
+        } else if (connectionAttempts >= 5) {
+          console.log('🛑 Max WebSocket reconnection attempts reached. Giving up.');
+          shouldConnectRef.current = false;
         }
       };
 
     } catch (error) {
-      console.error('❌ Connection failed:', error);
+      // Reduce console spam
+      if (connectionAttempts <= 3) {
+        console.error('❌ WebSocket connection failed:', error);
+      }
+      setIsConnected(false);
       setIsConnecting(false);
       isConnectingRef.current = false;
       
-      // Retry connection
-      if (shouldConnectRef.current) {
-        const delay = Math.min(1000 * Math.pow(1.5, connectionAttempts), 10000);
+      // Retry connection with limits
+      if (shouldConnectRef.current && connectionAttempts < 5) {
+        const delay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000);
         reconnectTimeoutRef.current = setTimeout(() => {
-          if (shouldConnectRef.current) {
+          if (shouldConnectRef.current && connectionAttempts < 5) {
             connect();
           }
         }, delay);
+      } else if (connectionAttempts >= 5) {
+        console.log('🛑 Max WebSocket connection attempts reached. Stopping.');
+        shouldConnectRef.current = false;
       }
     }
   };
 
   const forceReconnect = () => {
-    console.log('🔄 Force reconnect');
+    console.log('🔄 Force reconnect - resetting attempts');
     setConnectionAttempts(0);
+    shouldConnectRef.current = true;
     if (socketRef.current) {
       socketRef.current.close();
     } else {
@@ -155,6 +193,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   };
 
   const sendMessage = (type: string, data: any) => {
+    // TEMPORARY: WebSocket disabled
+    if (websocketDisabled) {
+      console.log('📤 WebSocket message discarded (disabled):', { type, data });
+      return false;
+    }
+    
     const message = { type, data };
     
     if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -162,28 +206,29 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         socketRef.current.send(JSON.stringify(message));
         return true;
       } catch (error) {
-        messageQueueRef.current.push(message);
         return false;
       }
     } else {
-      messageQueueRef.current.push(message);
-      if (!isConnecting && shouldConnectRef.current) {
-        setTimeout(connect, 100);
-      }
       return false;
     }
   };
 
-  // Initialize connection only once
+  // Initialize connection only once, with conservative approach
   useEffect(() => {
+    // TEMPORARY: Skip connection entirely when disabled
+    if (websocketDisabled) {
+      console.log('🚫 WebSocket initialization skipped (disabled)');
+      return;
+    }
+    
     shouldConnectRef.current = true;
     
-    // Small delay to prevent immediate execution
+    // Delay initial connection to prevent race conditions
     const timeout = setTimeout(() => {
-      if (shouldConnectRef.current) {
+      if (shouldConnectRef.current && connectionAttempts === 0) {
         connect();
       }
-    }, 200);
+    }, 2000);
 
     return () => {
       shouldConnectRef.current = false;
