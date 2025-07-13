@@ -23,8 +23,8 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Use API base URL for cross-origin requests
-  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  // Force localhost for local development, ignore any VITE_API_URL
+  const baseUrl = window.location.origin;
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
   const res = await fetch(fullUrl, {
@@ -51,8 +51,8 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // Use API base URL for cross-origin requests
-    const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    // Force localhost for local development, ignore any VITE_API_URL
+    const baseUrl = window.location.origin;
     const url = queryKey[0] as string;
     const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 

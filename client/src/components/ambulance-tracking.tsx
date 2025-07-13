@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Navigation } from "lucide-react";
+import { MapPin, Clock, Navigation as NavigationIcon } from "lucide-react";
 
 export function AmbulanceTracking() {
   const { data: ambulances, isLoading } = useQuery({
@@ -71,7 +71,7 @@ export function AmbulanceTracking() {
                 </div>
                 <div className="text-right">
                   <Badge variant="outline" className="text-xs">
-                    <Navigation className="w-3 h-3 mr-1" />
+                    <NavigationIcon className="w-3 h-3 mr-1" />
                     {ambulance.currentLatitude && ambulance.currentLongitude 
                       ? 'GPS Active' 
                       : 'GPS Pending'}

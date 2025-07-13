@@ -15,7 +15,7 @@ import {
   Clock, 
   MapPin, 
   MessageSquare,
-  Navigation,
+  Navigation as NavigationIcon,
   User,
   Phone,
   X
@@ -55,7 +55,7 @@ export default function AmbulanceDashboard() {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/emergency/requests'] });
       // Navigate to map view with the accepted request
-      setLocation(`/ambulance/navigate/${variables.requestId}`);
+      setLocation(`/PatientTracking/${variables.requestId}`);
     },
     onError: (error) => {
       console.error('Failed to accept request:', error);
@@ -260,7 +260,7 @@ export default function AmbulanceDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Navigation className="w-5 h-5 mr-2" />
+              <NavigationIcon className="w-5 h-5 mr-2" />
               Quick Actions
             </CardTitle>
           </CardHeader>

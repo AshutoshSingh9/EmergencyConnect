@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Clock, MapPin, Play, ExternalLink, RotateCcw, Smartphone } from 'lucide-react';
+import { Navigation as NavigationIcon, Clock, MapPin, Play, ExternalLink, RotateCcw, Smartphone } from 'lucide-react';
 
 interface NavigationMapProps {
   ambulanceLocation: { latitude: number; longitude: number };
@@ -210,7 +210,7 @@ export function NavigationMap({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Navigation className="w-5 h-5 text-blue-600" />
+            <NavigationIcon className="w-5 h-5 text-blue-600" />
             <span>Emergency Navigation</span>
           </div>
           <div className="flex items-center space-x-2">

@@ -451,7 +451,7 @@ export default function EnhancedPatientDashboard() {
                           )}
                           {request.estimatedArrival && (
                             <span className="flex items-center">
-                              <Navigation className="h-4 w-4 mr-1" />
+                              <NavigationIcon className="h-4 w-4 mr-1" />
                               ETA: {request.estimatedArrival} min
                             </span>
                           )}

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Timer, Navigation, Clock, Heart, AlertTriangle, Phone, MessageSquare, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Timer, Navigation as NavigationIcon, Clock, Heart, AlertTriangle, Phone, MessageSquare, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AmbulanceNavigation() {
@@ -67,7 +67,7 @@ export default function AmbulanceNavigation() {
       <div className="flex items-center gap-4">
         <Button 
           variant="outline" 
-          onClick={() => setLocation('/ambulance')}
+          onClick={() => setLocation('/AmbulanceDashboard')}
           className="shrink-0"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -146,7 +146,7 @@ export default function AmbulanceNavigation() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Navigation className="w-5 h-5 text-green-500" />
+              <NavigationIcon className="w-5 h-5 text-green-500" />
               Route Status
             </CardTitle>
           </CardHeader>

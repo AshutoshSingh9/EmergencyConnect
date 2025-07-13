@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { 
-  MapPin, Clock, Phone, User, AlertTriangle, Navigation, 
+  MapPin, Clock, Phone, User, AlertTriangle, Navigation as NavigationIcon, 
   CheckCircle, X, Timer, Gauge, Users, Activity, 
   Heart, Shield, Zap, Truck, Target, RotateCcw
 } from 'lucide-react';
@@ -308,7 +308,7 @@ export default function EnhancedAmbulanceDashboard() {
       {/* Active Request Alert */}
       {activeRequest && (
         <Alert className="border-l-4 border-l-blue-500 bg-blue-50">
-          <Navigation className="h-4 w-4" />
+          <NavigationIcon className="h-4 w-4" />
           <AlertDescription>
             <div className="flex justify-between items-center">
               <div>
@@ -438,7 +438,7 @@ export default function EnhancedAmbulanceDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Navigation className="h-5 w-5" />
+              <NavigationIcon className="h-5 w-5" />
               <span>Navigation to Emergency (Request #{activeRequest.id})</span>
             </CardTitle>
             <CardDescription>

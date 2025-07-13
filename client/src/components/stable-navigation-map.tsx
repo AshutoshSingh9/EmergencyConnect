@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, ExternalLink, Play, Clock, MapPin } from 'lucide-react';
+import { Navigation as NavigationIcon, ExternalLink, Play, Clock, MapPin } from 'lucide-react';
 
 interface StableNavigationMapProps {
   ambulanceLocation: { latitude: number; longitude: number };
@@ -165,7 +165,7 @@ export function StableNavigationMap({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Navigation className="h-5 w-5" />
+          <NavigationIcon className="h-5 w-5" />
           Navigation to Patient
           {isJourneyActive && <Badge variant="secondary">Journey Active</Badge>}
         </CardTitle>

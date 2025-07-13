@@ -41,7 +41,18 @@ function Router() {
       <div className="min-h-screen bg-neutral-50">
         <RoleHeader user={user} />
         <Switch>
+          {/* New branded URL routes */}
+          <Route path="/PatientDashboard" component={EnhancedPatientDashboard} />
+          <Route path="/AmbulanceDashboard" component={AmbulanceDashboard} />
+          <Route path="/HospitalDashboard" component={HospitalDashboard} />
+          <Route path="/AdminDashboard" component={AdminDashboard} />
+          <Route path="/PatientTracking/:requestId" component={AmbulanceNavigation} />
+          
+          {/* Legacy routes for backward compatibility */}
           <Route path="/ambulance/navigate/:requestId" component={AmbulanceNavigation} />
+          <Route path="/admin" component={AdminDashboard} />
+          
+          {/* Default route based on user role */}
           <Route path="/" component={() => {
             switch (user.role) {
               case 'patient':
@@ -56,7 +67,6 @@ function Router() {
                 return <NotFound />;
             }
           }} />
-          <Route path="/admin" component={AdminDashboard} />
           <Route component={NotFound} />
         </Switch>
       </div>
